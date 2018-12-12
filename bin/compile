@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly BUILD_DIR=$1
+readonly ENV_DIR=$3
+readonly TASK_FILE=.buildpack-run-rake-tasks
+
+if [[ ! -n "${BUILD_DIR}" ]]; then
+  echo "No build directory specified - exiting"
+  exit 1
+fi
+
+if [[ ! -n "${ENV_DIR}" ]]; then
+  echo "No env directory specified - exiting"
+  exit 1
+fi
+
+blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+if [ -d "$ENV_DIR" ]; then
+  for e in $(ls $ENV_DIR); do
+    echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
+      export "$e=$(cat $ENV_DIR/$e)"
+    :
+  done
+fi
+
+cd ${BUILD_DIR}
+
+if [[ ! -f "${TASK_FILE}" ]]; then
+  echo "Could not find .buildpack-run-rake-tasks file - exiting"
+  exit 1
+fi
+
+while read task; do
+  [[ ! -n "${task}" ]] && continue
+
+  rake $task
+done <${TASK_FILE}

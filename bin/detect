@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly BUILD_DIR=$1
+
+if [[ ! -n "${BUILD_DIR}" ]]; then
+  echo "No build directory specified - exiting"
+  exit 1
+fi
+
+if [[ ! -f "${BUILD_DIR}/.buildpack-run-rake-tasks" ]]; then
+  echo "Could not find .buildpack-run-rake-tasks file - exiting"
+  exit 1
+fi
+
+echo "Run Rake Tasks"
+exit 0
